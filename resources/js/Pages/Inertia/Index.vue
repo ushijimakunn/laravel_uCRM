@@ -2,5 +2,5 @@
 
 </script>
 <template>
-    aaaa
+    <h1>Index Page</h1>
 </template>
