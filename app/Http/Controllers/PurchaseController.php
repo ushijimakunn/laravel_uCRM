@@ -7,8 +7,10 @@ use App\Http\Requests\UpdatePurchaseRequest;
 use App\Models\Purchase;
 use App\Models\Customer;
 use App\Models\Item;
+use App\Models\Order;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\DB;
+
 
 class PurchaseController extends Controller
 {
@@ -19,7 +21,13 @@ class PurchaseController extends Controller
      */
     public function index()
     {
-        //
+        $orders = Order::groupBy('id')
+        ->selectRaw('id, sum(subtotal) as total, customer_name, status, created_at')
+        ->paginate(50);
+
+        return Inertia::render('Purchases/Index', [
+            'orders' => $orders
+        ]);
     }
 
     /**
@@ -83,7 +91,21 @@ class PurchaseController extends Controller
      */
     public function show(Purchase $purchase)
     {
-        //
+        // 小計
+        $items = Order::where('id', $purchase->id)
+                    ->get();
+
+        // 合計
+        $order = Order::groupBy('id')
+                    ->where('id', $purchase->id)
+                    ->selectRaw('id, sum(subtotal) as total, customer_name, status, created_at')
+                    ->get();
+
+        return Inertia::render('Purchases/Show',[
+            'items' => $items,
+            'order' => $order,
+        ]);
+
     }
 
     /**
