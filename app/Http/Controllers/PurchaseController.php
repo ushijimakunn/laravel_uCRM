@@ -162,7 +162,31 @@ class PurchaseController extends Controller
      */
     public function update(UpdatePurchaseRequest $request, Purchase $purchase)
     {
-        //
+
+        DB::beginTransaction();
+
+        try{
+            // purchasesの更新。今回はStatusのみ更新対象
+            $purchase->status = $request->status;
+            $purchase->save();
+
+            $items = [];
+
+            // 中間テーブルの数量更新
+            foreach($request->items as $item) {
+                $items = $items + [
+                    // item_id => [中間テーブルの列名 => 値]
+                    $item['id'] => ['quantity' => $item['quantity']]
+                ];
+            }
+            $purchase->items()->sync($items);
+
+            DB::commit();
+            return to_route('dashboard');
+        } catch(\Exception $e){
+            DB::rollBack();
+        }
+
     }
 
     /**
