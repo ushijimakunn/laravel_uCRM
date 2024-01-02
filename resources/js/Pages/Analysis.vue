@@ -4,6 +4,7 @@ import { Head } from '@inertiajs/vue3';
 import { reactive, onMounted } from 'vue';
 import { getToday } from '@/common';
 import axios from 'axios';
+import Chart from '@/Components/Chart.vue';
 
 onMounted(() => {
     form.startDate = getToday()
@@ -28,6 +29,8 @@ const getData = async() => {
             }
         }).then( res => {
             paramData.data = res.data.data
+            paramData.labels = res.data.labels
+            paramData.totals = res.data.totals
             console.log(paramData.data)
         })
     } catch(e) {
@@ -57,6 +60,11 @@ const getData = async() => {
                                 分析する
                             </button>
                         </form>
+
+                        <!-- グラフ -->
+                        <div v-show="paramData.data">
+                            <Chart :data="paramData"/>
+                        </div>
 
                         <!-- 表 -->
                         <div v-if="paramData.data" class="lg:w-2/3 w-full mx-auto overflow-auto">
